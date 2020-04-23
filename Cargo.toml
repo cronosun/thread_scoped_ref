@@ -5,6 +5,8 @@ authors = ["cronosun"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
 description = "A library that is similar to a thread local storage but allows to store references / dyn Trait within a scope."
+homepage = "https://github.com/cronosun/thread_scoped_ref"
+repository = "https://github.com/cronosun/thread_scoped_ref"
 
 [dependencies]
 
