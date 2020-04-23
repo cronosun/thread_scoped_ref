@@ -5,15 +5,15 @@ It can be used to 'inject' references (if you don't own the data and Rc/Arc is n
 don't control entirely (e.g. a function you provide that gets called by a library you don't own).
 
 ```
-          +------- (set) -----------> &Data <---------- (access/read) ----------+
-          |                                                                     |
-+---------+------------+           +--------------------------------------------|-------------+
-| Data                 |           | External library                           |             |
-| (huge/context/no Rc) |           |                                            |             |
-+----------------------+           |                                +-----------+------+      |
-                                   |              ---- (calls) ---> | Your function    |      |
-                                   |                                +------------------+      |
-                                   +----------------------------------------------------------+
+          +----- (set) ---------> &Data <------- (access/read) ----------+
+          |                                                              |
++---------+------------+    +--------------------------------------------|-------------+
+| Data                 |    | External library                           |             |
+| (huge/context/no Rc) |    |                                            |             |
++----------------------+    |                                +-----------+------+      |
+                            |              ---- (calls) ---> | Your function    |      |
+                            |                                +------------------+      |
+                            +----------------------------------------------------------+
 ```
 
 
@@ -34,7 +34,7 @@ thread-scoped-ref = "0"
 
 ## Example
 
- ```
+ ```rust
  use thread_scoped_ref::{thread_scoped_ref, scoped, with};
  use std::collections::HashMap;
 
