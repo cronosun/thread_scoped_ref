@@ -122,7 +122,7 @@ pub fn simple_test_manual() {
 
 thread_scoped_ref!(PERSON, Person);
 
-/// Also works with structures (must not be a trait).
+/// Also works with structures.
 #[test]
 pub fn test_with_struct() {
     let mut found_name = None;
