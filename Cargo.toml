@@ -7,10 +7,12 @@ license = "MIT OR Apache-2.0"
 description = "A library that is similar to a thread local storage but allows to store references / dyn Trait within a scope."
 homepage = "https://github.com/cronosun/thread_scoped_ref"
 repository = "https://github.com/cronosun/thread_scoped_ref"
+readme = "README.md"
+keywords = ["thread_local", "thread", "macro", "inject"]
+categories = ["rust-patterns", "memory-management"]
 
 [dependencies]
 
 [dev-dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-

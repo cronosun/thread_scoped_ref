@@ -10,6 +10,41 @@
 //!
 //! # Example
 //!
+//! Short example:
+//!
+//! ```
+//! use thread_scoped_ref::{thread_scoped_ref, scoped, with};
+//! use std::collections::HashMap;
+//!
+//! thread_scoped_ref!(SOME_ENV_VALUES, HashMap<String, String>);
+//!
+//! /// It's not possible to pass `&HashMap<String, String>` to this function since it's called
+//! /// by some library you don't control...
+//! fn read_env_value() {
+//!   // ... so we read from the static 'SOME_ENV_VALUES'.
+//!   with(&SOME_ENV_VALUES, |maybe_env_values| {
+//!     // don't "unwrap" in reality: Since `maybe_env_values` will be `None` if not
+//!     // called within a scope!
+//!     let env_values = maybe_env_values.unwrap();
+//!     assert_eq!("true", env_values.get("delete_entire_ssd").unwrap());
+//!   });
+//! }
+//!
+//!  /// An external library you don't control or generated code.
+//! fn external_library(function_ptr : fn()) {
+//!    function_ptr();
+//! }
+//!
+//! let mut env_values = HashMap::default();
+//! env_values.insert("delete_entire_ssd".to_string(), "true".to_string());
+//! // Create a scope. Note: We only need a reference to `env_values` (no move required).
+//! scoped(&SOME_ENV_VALUES, &env_values, || {
+//!   external_library(read_env_value);
+//! });
+//! ```
+//!
+//! Long example:
+//!
 //! ```
 //! use thread_scoped_ref::{thread_scoped_ref, scoped, with};
 //!
@@ -61,44 +96,14 @@
 //!
 //! # Use case
 //!
-//! It's useful if you need to 'inject' some sort of context into a function you can't modify. One
-//! example is Serde - the serialize/deserialize methods don't provide a possibility to supply
-//! a custom context; with this library this becomes possible. It would be no problem if you
-//! owned the context - but if you only have a reference to the context it gets harder.
+//! It's useful if you need to 'inject' some sort of context into a function you provide that gets
+//! called by a library you don't control. One example is Serde: You can write custom
+//! serialize/deserialize methods but it's not possible to call them with custom data (a context) -
+//! unless you also write the serialization/deserialization of the container manually (not by using
+//! Serde derive).
 //!
-//! For example, say you have some sort of messaging system (IPC) and the client gets this:
-//!
-//! ```rust,ignore
-//! struct Handle(u32);
-//!
-//! /// This is the message the client receives from the server.
-//! struct Message {
-//!   payload : Vec<u8>,
-//!   handles : Vec<Handle>,
-//! }
-//! ```
-//!
-//! Note that the handles are transferred independently (since the IPC-system has to inspect them;
-//! validate and maybe transform). Now say we want to deserialize something like this:
-//!
-//! ```rust,ignore
-//! #[derive(Deserialize)]
-//! struct TheStruct {
-//!   // this data is from `payload: Vec<u8>` (nothing special here)
-//!   description : String,
-//!   // this data is from `payload: Vec<u8>` (nothing special here)
-//!   extended : bool,
-//!   // !!!: This data comes from `handles: Vec<Handle>` and not from `payload: Vec<u8>`
-//!   master_handle : Handle,
-//!   // !!!: This data comes from `handles: Vec<Handle>` and not from `payload: Vec<u8>`
-//!   slave_handle : Handle,
-//!   // this data is from `payload: Vec<u8>` (nothing special here)
-//!   path : Vec<String>
-//! }
-//! ```
-//!
-//! Something like this can be achieved with the thread scoped references. See the Serde demo
-//! tests for details.
+//! Something like this can be achieved with thread scoped references. See the Serde demo
+//! test for details.
 
 mod helper;
 mod scope;

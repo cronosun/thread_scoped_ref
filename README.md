@@ -1,71 +1,75 @@
 # thread_scoped_ref
 
 A library that is similar to a thread local storage but allows to store references / dyn Trait within a scope.
-It can be used to 'inject' references (if you don't own the data) into functions you don't control (e.g. functions from an external library).
+It can be used to 'inject' references (if you don't own the data and Rc/Arc is not possible) into something you
+don't control entirely (e.g. a function you provide that gets called by a library you don't own).
 
-# Cargo
+```
+          +------- (set) -----------> &Data <---------- (access/read) ----------+
+          |                                                                     |
++---------+------------+           +--------------------------------------------|-------------+
+| Data                 |           | External library                           |             |
+| (huge/context/no Rc) |           |                                            |             |
++----------------------+           |                                +-----------+------+      |
+                                   |              ---- (calls) ---> | Your function    |      |
+                                   |                                +------------------+      |
+                                   +----------------------------------------------------------+
+```
+
+
+# More information
+
+  * [crates.io](https://crates.io/crates/thread-scoped-ref)
+  * [Documentation](https://docs.rs/thread-scoped-ref)
+  * Tests
+
+# Usage
+
+## Cargo
 
 ```toml
 [dependencies]
 thread-scoped-ref = "0"
 ```
 
-# More information
+## Example
 
-See crates.io, the documentation and the tests.
-
-# Example
-
- ```rust
+ ```
  use thread_scoped_ref::{thread_scoped_ref, scoped, with};
+ use std::collections::HashMap;
 
- /// Declare the `REF_TO_A_STRING`.
- thread_scoped_ref!(REF_TO_A_STRING, str);
+ thread_scoped_ref!(SOME_ENV_VALUES, HashMap<String, String>);
 
- /// This function reads the value and prints the value. This function is usually called by an external
- /// library you don't control.
- fn value_consumer() {
-   with(&REF_TO_A_STRING, |maybe_string| {
-     // `maybe_string` is `Some` if this is called within a scope, or `None` if not called
-     // within a scope.
-     if let Some(string) = maybe_string {
-       println!("String is: '{}'", string);
-     } else {
-       println!("There's no string.");
-     }
+ /// It's not possible to pass `&HashMap<String, String>` to this function since it's called
+ /// by some library you don't control...
+ fn read_env_value() {
+   // ... so we read from the static 'SOME_ENV_VALUES'.
+   with(&SOME_ENV_VALUES, |maybe_env_values| {
+     // don't "unwrap" in reality: Since `maybe_env_values` will be `None` if not
+     // called within a scope!
+     let env_values = maybe_env_values.unwrap();
+     assert_eq!("true", env_values.get("delete_entire_ssd").unwrap());
    });
  }
 
- // Example #1: prints `There's no string` (since not called within a scope).
- value_consumer();
+  /// An external library you don't control or generated code.
+ fn external_library(function_ptr : fn()) {
+    function_ptr();
+ }
 
- // Example #2: With a scope.
- let my_string = "The String!".to_string();
- // note: We use the reference and not the actual string. It's not static!
- let my_string_ref = &my_string;
- scoped(&REF_TO_A_STRING, my_string_ref, || {
-   // prints `String is: 'The String!'`
-   value_consumer();
+ let mut env_values = HashMap::default();
+ env_values.insert("delete_entire_ssd".to_string(), "true".to_string());
+ // Create a scope. Note: We only need a reference to `env_values` (no move required).
+ scoped(&SOME_ENV_VALUES, &env_values, || {
+   external_library(read_env_value);
  });
-
- // Example #3: Nested scopes.
- let another_string = "Another string".to_string();
- scoped(&REF_TO_A_STRING, &another_string, || {
-   // prints `String is: 'Another string'`
-   value_consumer();
-   // a nested scope.
-   scoped(&REF_TO_A_STRING, my_string_ref, || {
-     // prints `String is: 'The String!'`
-     value_consumer();
-   });
-   // prints `String is: 'Another string'`
-   value_consumer();
- });
-
- // Example #4: No scope (like example 1). prints `There's no string`.
- value_consumer();
  ```
 
 # License
 
-MIT OR Apache-2.0
+Licensed under either of
+
+ * Apache License, Version 2.0, ([http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0))
+ * MIT license ([http://opensource.org/licenses/MIT](http://opensource.org/licenses/MIT))
+
+at your option.
