@@ -8,7 +8,7 @@ description = "A library that is similar to a thread local storage but allows to
 homepage = "https://github.com/cronosun/thread_scoped_ref"
 repository = "https://github.com/cronosun/thread_scoped_ref"
 readme = "README.md"
-keywords = ["thread_local", "thread", "macro", "inject", "scoped-tls", "scoped_thread_local"]
+keywords = ["thread_local", "macro", "inject", "scoped-tls", "scoped_thread_local"]
 categories = ["rust-patterns", "memory-management"]
 
 [dependencies]
