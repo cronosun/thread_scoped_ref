@@ -4,7 +4,19 @@ A library that is similar to a thread local storage but allows to store referenc
 It can be used to 'inject' references (if you don't own the data and Rc/Arc is not possible) into something you
 don't control entirely (e.g. a function you provide that gets called by a library you don't own).
 
+It's also very similar to [https://github.com/alexcrichton/scoped-tls](https://github.com/alexcrichton/scoped-tls), with those differences:
+
+ * `thread_scoped_ref` works with traits / unsized types.
+ * `thread_scoped_ref` does not panic when calling `ScopedKey::with`, instead calls the closure with `None`.
+
+According to `scoped-tls` there once was something similar in the old rust standard library (quote from `scoped-tls`):
+
+> A Rust library providing the old standard library's `scoped_thread_local!` macro as a library implementation on crates.io.
+
+Example use case:
+
 ```
+
           +----- (set) ---------> &Data <------- (access/read) ----------+
           |                                                              |
 +---------+------------+    +--------------------------------------------|-------------+
