@@ -13,10 +13,12 @@ According to `scoped-tls` there once was something similar in the old rust stand
 
 > A Rust library providing the old standard library's `scoped_thread_local!` macro as a library implementation on crates.io.
 
+... and another library that seems to do the same (and a bit more, like mutable references) [https://crates.io/crates/scoped-tls-hkt](https://crates.io/crates/scoped-tls-hkt) - it seems that we both worked on this at almost the same time (the author of `scoped-tls-hkt` released it last week; 2020-04-18). You should definitely check that out too.
+
 Example use case:
 
 ```
-
+.
           +----- (set) ---------> &Data <------- (access/read) ----------+
           |                                                              |
 +---------+------------+    +--------------------------------------------|-------------+
